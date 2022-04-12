@@ -4,7 +4,12 @@ An Emacs Viewer for Scrapbox
 
 ## Prerequisites
 
+- Ivy
 - [motemen/sbx](https://github.com/motemen/sbx) command
+
+## Commands
+
+- `M-x counsel-scrapbox` does the thing.
 
 ## Variables
 
