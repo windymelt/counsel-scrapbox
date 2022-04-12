@@ -29,24 +29,33 @@
 
 (ivy-set-actions 'counsel-scrapbox
                  '(("o" counsel-scrapbox--open-page "open file")
-                   ("y" kill "copy")))
+                   ("y" kill "copy")
+                   ("r" counsel-scrapbox--kill-cache-and-reopen "Kill cache")))
 
 (defmacro counsel-scrapbox--line-string ()
   `(buffer-substring-no-properties
     (line-beginning-position) (line-end-position)))
 
 (defun counsel-scrapbox--list-candidates ()
-  (with-temp-buffer
-    (unless (zerop (apply #'call-process
-                          counsel-scrapbox-command-sbx nil t nil
-                          counsel-scrapbox-command-sbx-arg-list))
-      (error "Failed: Can't get sbx list candidates"))
-    (let ((pages))
-      (goto-char (point-min))
-      (while (not (eobp))
-        (push (counsel-scrapbox--line-string) pages)
-        (forward-line 1))
-      (reverse pages))))
+  (if counsel-scrapbox--candidates-cache
+      counsel-scrapbox--candidates-cache
+    (setq counsel-scrapbox--candidates-cache
+          (with-temp-buffer
+            (unless (zerop (apply #'call-process
+                                  counsel-scrapbox-command-sbx nil t nil
+                                  counsel-scrapbox-command-sbx-arg-list))
+              (error "Failed: Can't get sbx list candidates"))
+            (let ((pages))
+              (goto-char (point-min))
+              (while (not (eobp))
+                (push (counsel-scrapbox--line-string) pages)
+                (forward-line 1))
+              (reverse pages))))))
+
+(defvar counsel-scrapbox--candidates-cache nil)
+(defun counsel-scrapbox--kill-cache-and-reopen (_)
+  (setq counsel-scrapbox--candidates-cache nil)
+  (counsel-scrapbox))
 
 (defun counsel-scrapbox--reveal-dquotes (s)
   (with-temp-buffer
@@ -101,8 +110,10 @@
 
 (defconst scrapbox-font-lock-keywords-1
   (list
-   '("[\\.*]" . font-lock-doc-face)
-   '("#\\.*" . font-lock-function-name-face))
+   '("\\[\\[.+\\]\\]" . font-lock-keyword-face)
+   '("\\[* .+\\]" . font-lock-keyword-face)
+   '("\\[.+\\]" . font-lock-doc-face)
+   '("#\\w+" . font-lock-function-name-face))
   "minimal highlighting expressions for Scrapbox mode")
 
 (defvar scrapbox-mode-syntax-table
