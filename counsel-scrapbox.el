@@ -58,13 +58,10 @@
   (counsel-scrapbox))
 
 (defun counsel-scrapbox--reveal-dquotes (s)
-  (with-temp-buffer
-    (insert s)
-    (goto-char (point-min))
-    (replace-regexp "\"\\(.*\\)\"" "\\1" )
-    (goto-char (point-min))
-    (replace-string "/" "%2F")
-    (counsel-scrapbox--line-string)))
+  ""
+  (let* ((s1 (replace-regexp-in-string "\"\\(.*\\)\"" "\\1" s))
+         (s2 (replace-regexp-in-string "/" "%2F" s1 t t)))
+    s2))
 
 (defun counsel-scrapbox--open-page (page)
   "Open PAGE."
