@@ -99,7 +99,7 @@
 
 (defvar scrapbox-mode-map
   (let ((map (make-keymap)))
-    (define-key map "\M-." 'counsel-scrapbox--open-page-interactive)
+    (define-key map "\M-." 'scrapbox-mode-open-page-at-point)
     (define-key map "q" 'kill-this-buffer)
     (define-key map "/" 'counsel-scrapbox)
     map)
@@ -110,12 +110,20 @@
    '("\\[\\[.+\\]\\]" . font-lock-keyword-face)
    '("\\[* .+\\]" . font-lock-keyword-face)
    '("\\[.+\\]" . font-lock-doc-face)
+   '("`.+`" . font-lock-function-name-face)
+   '("code:.+\n" . font-lock-function-name-face)
    '("#\\w+" . font-lock-function-name-face))
   "minimal highlighting expressions for Scrapbox mode")
 
 (defvar scrapbox-mode-syntax-table
   (let ((st (make-syntax-table)))
     st))
+
+(defun scrapbox-mode-open-page-at-point ()
+  "Open the page at the point."
+  (interactive)
+  (let ((page (symbol-name (symbol-at-point))))
+    (counsel-scrapbox--open-page page)))
 
 (defun scrapbox-mode ()
   "Major mode for visiting Scrapbox"
